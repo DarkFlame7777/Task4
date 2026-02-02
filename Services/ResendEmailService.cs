@@ -21,7 +21,7 @@ namespace Task4.Services
 
         public async Task SendVerificationEmailAsync(string email, string name, string verificationToken)
         {
-            var baseUrl = _configuration["AppBaseUrl"];
+            var baseUrl = "https://task4-production-5742.up.railway.app";
             var encodedToken = Uri.EscapeDataString(verificationToken);
             var verificationLink = $"{baseUrl}/Account/VerifyEmail?token={encodedToken}";
             var senderEmail = _configuration["EmailSettings:SenderEmail"];
@@ -48,4 +48,5 @@ namespace Task4.Services
             }
         }
     }
+
 }
