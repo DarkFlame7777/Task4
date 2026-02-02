@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "dotnet Task4.dll",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

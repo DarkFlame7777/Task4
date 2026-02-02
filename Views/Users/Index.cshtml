@@ -1,0 +1,172 @@
+﻿@model List<Task4.ViewModels.UserViewModel>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="toolbar bg-light p-3 mb-3 rounded d-flex align-items-center">
+    <button type="button" class="btn btn-danger me-2" id="blockBtn" disabled>
+        <i class="bi bi-lock"></i> Block
+    </button>
+
+    <button type="button" class="btn btn-success me-2" id="unblockBtn" disabled title="Unblock">
+        <i class="bi bi-unlock"></i>
+    </button>
+
+    <button type="button" class="btn btn-outline-danger me-2" id="deleteBtn" disabled title="Delete">
+        <i class="bi bi-trash"></i>
+    </button>
+
+    <button type="button" class="btn btn-warning" id="deleteUnverifiedBtn" title="Delete unverified users">
+        <i class="bi bi-person-x"></i>
+    </button>
+
+    <form id="blockForm" asp-action="BlockUsers" method="post" style="display: none;">
+        <input type="hidden" name="userIds" id="blockUserIds" />
+    </form>
+
+    <form id="unblockForm" asp-action="UnblockUsers" method="post" style="display: none;">
+        <input type="hidden" name="userIds" id="unblockUserIds" />
+    </form>
+
+    <form id="deleteForm" asp-action="DeleteUsers" method="post" style="display: none;">
+        <input type="hidden" name="userIds" id="deleteUserIds" />
+    </form>
+
+    <form id="deleteUnverifiedForm" asp-action="DeleteUnverifiedUsers" method="post" style="display: none;">
+    </form>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-light">
+        <tr>
+            <th style="width: 50px;">
+                <input type="checkbox" id="selectAll" />
+            </th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Last Activity</th>
+            <th>Registration Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    <input type="checkbox" class="user-checkbox" data-userid="@user.Id" />
+                </td>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>
+                    @switch (user.Status)
+                    {
+                        case Task4.Enums.UserStatus.Active:
+                            <span class="badge bg-success">Active</span>
+                            break;
+                        case Task4.Enums.UserStatus.Unverified:
+                            <span class="badge bg-warning">Unverified</span>
+                            break;
+                        case Task4.Enums.UserStatus.Blocked:
+                            <span class="badge bg-danger">Blocked</span>
+                            break;
+                    }
+                </td>
+                <td>@(user.LastLoginTime?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                <td>@(user.LastActivityTime?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                <td>@user.RegistrationTime.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+
+        function updateToolbar() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            const blockBtn = document.getElementById('blockBtn');
+            const unblockBtn = document.getElementById('unblockBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+
+            const hasSelected = checkboxes.length > 0;
+            blockBtn.disabled = !hasSelected;
+            unblockBtn.disabled = !hasSelected;
+            deleteBtn.disabled = !hasSelected;
+        }
+
+        document.getElementById('selectAll').addEventListener('change', function(e) {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateToolbar();
+        });
+
+        document.querySelectorAll('.user-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allCheckboxes = document.querySelectorAll('.user-checkbox');
+                const selectAllCheckbox = document.getElementById('selectAll');
+
+                const allChecked = Array.from(allCheckboxes).every(c => c.checked);
+                const anyChecked = Array.from(allCheckboxes).some(c => c.checked);
+
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = anyChecked && !allChecked;
+
+                updateToolbar();
+            });
+        });
+
+        document.getElementById('blockBtn').addEventListener('click', function() {
+            const ids = getSelectedUserIds();
+            if (ids.length === 0) {
+                alert('Please select at least one user');
+                return;
+            }
+            if (confirm(`Are you sure you want to block ${ids.length} user(s)?`)) {
+                document.getElementById('blockUserIds').value = ids.join(',');
+                document.getElementById('blockForm').submit();
+            }
+        });
+
+        document.getElementById('unblockBtn').addEventListener('click', function() {
+            const ids = getSelectedUserIds();
+            if (ids.length === 0) {
+                alert('Please select at least one user');
+                return;
+            }
+            if (confirm(`Are you sure you want to unblock ${ids.length} user(s)?`)) {
+                document.getElementById('unblockUserIds').value = ids.join(',');
+                document.getElementById('unblockForm').submit();
+            }
+        });
+
+        document.getElementById('deleteBtn').addEventListener('click', function() {
+            const ids = getSelectedUserIds();
+            if (ids.length === 0) {
+                alert('Please select at least one user');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete ${ids.length} user(s)? This action cannot be undone.`)) {
+                document.getElementById('deleteUserIds').value = ids.join(',');
+                document.getElementById('deleteForm').submit();
+            }
+        });
+
+        document.getElementById('deleteUnverifiedBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete all unverified users? This action cannot be undone.')) {
+                document.getElementById('deleteUnverifiedForm').submit();
+            }
+        });
+
+        function getSelectedUserIds() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.getAttribute('data-userid'));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateToolbar();
+        });
+    </script>
+}
