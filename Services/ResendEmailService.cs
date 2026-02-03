@@ -22,17 +22,32 @@ namespace Task4.Services
             {
                 var apiKey = _configuration["ResendApiKey"];
                 if (string.IsNullOrEmpty(apiKey)) return;
-        
-                _httpClient.DefaultRequestHeaders.Authorization = 
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-        
-                var baseUrl = _configuration["AppBaseUrl"] ?? "https://task4-production-5742.up.railway.app";
+
+                var baseUrl = _configuration["AppBaseUrl"];
+                
+                if (!string.IsNullOrEmpty(baseUrl))
+                {
+                    if (!baseUrl.StartsWith("http://") && !baseUrl.StartsWith("https://"))
+                    {
+                        baseUrl = "https://" + baseUrl;
+                    }
+                }
+                else
+                {
+                    baseUrl = "https://task4-production-5742.up.railway.app";
+                }
+
+
+                baseUrl = baseUrl.TrimEnd('/');
+                
+
                 var verificationLink = $"{baseUrl}/Account/VerifyEmail?token={verificationToken}";
                 
                 var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "onboarding@resend.dev";
-        
-                Console.WriteLine($"DEBUG: Generated link: {verificationLink}");
-        
+
+                _httpClient.DefaultRequestHeaders.Authorization = 
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+
                 var payload = new
                 {
                     from = senderEmail,
@@ -45,20 +60,15 @@ namespace Task4.Services
                         <p><a href='{verificationLink}'>{verificationLink}</a></p>
                         <p>If you didn't register, please ignore this email.</p>"
                 };
-        
+
                 var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
-                
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"DEBUG: Resend response: {responseContent}");
+                await _httpClient.PostAsync("https://api.resend.com/emails", content);
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"ERROR sending email: {ex.Message}");
+
             }
         }
     }
 }
-
-
