@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +17,11 @@ namespace Task4.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
 
-        public AccountController(ApplicationDbContext context, IEmailService emailService,
-                                IConfiguration configuration)
+        public AccountController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
-            _configuration = configuration;
         }
 
         [HttpGet]
@@ -157,51 +154,6 @@ namespace Task4.Controllers
 
         private string GenerateVerificationToken(string email) 
             => Convert.ToBase64String(Encoding.UTF8.GetBytes(email));
-        // Метод 1: DebugEmail - убрать async
-        [HttpGet]
-        [Route("debug-email")]
-        public IActionResult DebugEmail() // УБРАТЬ async и Task<>
-        {
-            try
-            {
-                var apiKey = _configuration["ResendApiKey"];
-                var baseUrl = _configuration["AppBaseUrl"];
-                var senderEmail = _configuration["EmailSettings:SenderEmail"];
-                
-                return Content($"ResendApiKey: {(string.IsNullOrEmpty(apiKey) ? "MISSING" : "OK")}<br>" +
-                              $"AppBaseUrl: {baseUrl ?? "MISSING"}<br>" +
-                              $"SenderEmail: {senderEmail ?? "MISSING"}<br>" +
-                              $"<a href='/Account/test-send-email'>Test Send Email</a>");
-            }
-            catch (Exception ex)
-            {
-                return Content($"Error: {ex.Message}");
-            }
-        }
-        
-        // Метод 2: TestSendEmail - оставить async
-        [HttpGet]
-        [Route("test-send-email")]
-        public async Task<IActionResult> TestSendEmail() // ОСТАВИТЬ async
-        {
-            try
-            {
-                await _emailService.SendVerificationEmailAsync(
-                    "player859@yandex.by", 
-                    "Test User", 
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes("test@example.com"))
-                );
-                
-                return Content("Test email triggered. Check Railway logs.");
-            }
-            catch (Exception ex)
-            {
-                return Content($"Error: {ex.Message}");
-            }
-        }
+
     }
-
 }
-
-
-
