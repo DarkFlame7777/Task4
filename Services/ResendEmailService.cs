@@ -27,9 +27,11 @@ namespace Task4.Services
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
         
                 var baseUrl = _configuration["AppBaseUrl"] ?? "https://task4-production-5742.up.railway.app";
-                var encodedToken = Uri.EscapeDataString(verificationToken);
-                var verificationLink = $"{baseUrl}/Account/VerifyEmail?token={encodedToken}";
+                var verificationLink = $"{baseUrl}/Account/VerifyEmail?token={verificationToken}";
+                
                 var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "onboarding@resend.dev";
+        
+                Console.WriteLine($"DEBUG: Generated link: {verificationLink}");
         
                 var payload = new
                 {
@@ -46,12 +48,17 @@ namespace Task4.Services
         
                 var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                await _httpClient.PostAsync("https://api.resend.com/emails", content);
+                var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
+                
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"DEBUG: Resend response: {responseContent}");
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"ERROR sending email: {ex.Message}");
             }
         }
     }
 }
+
 
