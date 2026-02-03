@@ -1,3 +1,4 @@
+using Task4.Services;
 public class ResendEmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
@@ -79,3 +80,4 @@ public class ResendEmailService : IEmailService
         }
     }
 }
+
