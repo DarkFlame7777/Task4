@@ -17,11 +17,14 @@ namespace Task4.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(ApplicationDbContext context, IEmailService emailService)
+        public AccountController(ApplicationDbContext context, IEmailService emailService,
+                                IConfiguration configuration)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -200,3 +203,4 @@ namespace Task4.Controllers
     }
 
 }
+
