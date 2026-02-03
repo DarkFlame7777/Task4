@@ -159,7 +159,7 @@ namespace Task4.Controllers
             => Convert.ToBase64String(Encoding.UTF8.GetBytes(email));
         [HttpGet]
         [Route("debug-email")]
-        public async Task<IActionResult> DebugEmail()
+        public Task<IActionResult> DebugEmail()
         {
             try
             {
@@ -203,4 +203,5 @@ namespace Task4.Controllers
     }
 
 }
+
 
