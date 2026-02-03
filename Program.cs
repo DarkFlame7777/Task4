@@ -11,6 +11,8 @@ namespace Task4
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddEnvironmentVariables();
+
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
             if (string.IsNullOrEmpty(connectionString))
                 throw new Exception("DATABASE_URL environment variable is not set");
