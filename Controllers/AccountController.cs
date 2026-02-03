@@ -157,15 +157,13 @@ namespace Task4.Controllers
 
         private string GenerateVerificationToken(string email) 
             => Convert.ToBase64String(Encoding.UTF8.GetBytes(email));
+        // Метод 1: DebugEmail - убрать async
         [HttpGet]
         [Route("debug-email")]
-        public Task<IActionResult> DebugEmail()
+        public IActionResult DebugEmail() // УБРАТЬ async и Task<>
         {
             try
             {
-                Console.WriteLine("=== DEBUG EMAIL ===");
-                
-                // Проверим конфигурацию
                 var apiKey = _configuration["ResendApiKey"];
                 var baseUrl = _configuration["AppBaseUrl"];
                 var senderEmail = _configuration["EmailSettings:SenderEmail"];
@@ -181,9 +179,10 @@ namespace Task4.Controllers
             }
         }
         
+        // Метод 2: TestSendEmail - оставить async
         [HttpGet]
         [Route("test-send-email")]
-        public async Task<IActionResult> TestSendEmail()
+        public async Task<IActionResult> TestSendEmail() // ОСТАВИТЬ async
         {
             try
             {
@@ -203,5 +202,6 @@ namespace Task4.Controllers
     }
 
 }
+
 
 
