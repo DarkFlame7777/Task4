@@ -22,15 +22,15 @@ namespace Task4.Services
             {
                 var apiKey = _configuration["ResendApiKey"];
                 if (string.IsNullOrEmpty(apiKey)) return;
-
+        
                 _httpClient.DefaultRequestHeaders.Authorization = 
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-
+        
                 var baseUrl = _configuration["AppBaseUrl"] ?? "https://task4-production-5742.up.railway.app";
                 var encodedToken = Uri.EscapeDataString(verificationToken);
                 var verificationLink = $"{baseUrl}/Account/VerifyEmail?token={encodedToken}";
                 var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "onboarding@resend.dev";
-
+        
                 var payload = new
                 {
                     from = senderEmail,
@@ -43,7 +43,7 @@ namespace Task4.Services
                         <p><a href='{verificationLink}'>{verificationLink}</a></p>
                         <p>If you didn't register, please ignore this email.</p>"
                 };
-
+        
                 var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 await _httpClient.PostAsync("https://api.resend.com/emails", content);
@@ -54,3 +54,4 @@ namespace Task4.Services
         }
     }
 }
+
