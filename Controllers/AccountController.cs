@@ -154,6 +154,49 @@ namespace Task4.Controllers
 
         private string GenerateVerificationToken(string email) 
             => Convert.ToBase64String(Encoding.UTF8.GetBytes(email));
-
+        [HttpGet]
+        [Route("debug-email")]
+        public async Task<IActionResult> DebugEmail()
+        {
+            try
+            {
+                Console.WriteLine("=== DEBUG EMAIL ===");
+                
+                // Проверим конфигурацию
+                var apiKey = _configuration["ResendApiKey"];
+                var baseUrl = _configuration["AppBaseUrl"];
+                var senderEmail = _configuration["EmailSettings:SenderEmail"];
+                
+                return Content($"ResendApiKey: {(string.IsNullOrEmpty(apiKey) ? "MISSING" : "OK")}<br>" +
+                              $"AppBaseUrl: {baseUrl ?? "MISSING"}<br>" +
+                              $"SenderEmail: {senderEmail ?? "MISSING"}<br>" +
+                              $"<a href='/Account/test-send-email'>Test Send Email</a>");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error: {ex.Message}");
+            }
+        }
+        
+        [HttpGet]
+        [Route("test-send-email")]
+        public async Task<IActionResult> TestSendEmail()
+        {
+            try
+            {
+                await _emailService.SendVerificationEmailAsync(
+                    "player859@yandex.by", 
+                    "Test User", 
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes("test@example.com"))
+                );
+                
+                return Content("Test email triggered. Check Railway logs.");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error: {ex.Message}");
+            }
+        }
     }
+
 }
